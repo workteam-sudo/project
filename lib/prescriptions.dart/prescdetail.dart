@@ -206,7 +206,9 @@ class PrescriptionDetailsScreen extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/requestrefill');
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,

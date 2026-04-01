@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/admissiondetail.dart/admissionpage.dart';
+import 'package:flutter_application_1/admissiondetail.dart/editprofile.dart';
+import 'package:flutter_application_1/admissiondetail.dart/patientprofile.dart';
 import 'package:flutter_application_1/app.dart/screens.dart';
 import 'package:flutter_application_1/appointments.dart/bookappoint.dart';
 import 'package:flutter_application_1/authentication.dart/verifycode.dart';
 import 'package:flutter_application_1/appointments.dart/appointment.dart';
 import 'package:flutter_application_1/appointments.dart/confirmappoint.dart';
 import 'package:flutter_application_1/billinginformation.dart/billingpage.dart';
+import 'package:flutter_application_1/billinginformation.dart/comppayment.dart';
+import 'package:flutter_application_1/billinginformation.dart/paymentdetails.dart';
+import 'package:flutter_application_1/billinginformation.dart/paymentmethod.dart';
+import 'package:flutter_application_1/billinginformation.dart/sendreminder.dart';
+import 'package:flutter_application_1/billinginformation.dart/viewdetails.dart';
+import 'package:flutter_application_1/billinginformation.dart/viewreceipt.dart';
+import 'package:flutter_application_1/billinginformation.dart/viewschedule.dart';
 import 'package:flutter_application_1/logout.dart/logoutpage.dart';
 import 'package:flutter_application_1/notifications.dart/notificationpage.dart';
 import 'package:flutter_application_1/patientdash.dart/dashboard.dart';
@@ -49,7 +58,16 @@ class MyApp extends StatelessWidget {
         '/prescdetail': (context) => PrescriptionDetailsScreen(),
         '/requestrefill': (context) => RequestRefillScreen(),
         '/admissiondetail': (context) => AdmissionDetailsPage(),
+        '/patientprofile': (context) => PatientProfileScreen(),
+        '/editprofile': (context) => EditProfileScreen(),
         '/billinginformation': (context) => BillingInformationPage(),
+        '/viewdetails': (context) => InvoiceDetailsScreen(),
+        '/paymentmethod': (context) => PaymentMethodScreen(),
+        '/paymentdetails': (context) => PaymentDetailsScreen(),
+        '/comppayment': (context) => PaymentProcessingScreen(),
+        '/viewreceipt': (context) => ReceiptDetailsScreen(),
+        '/sendreminder': (context) => SendReminderScreen1(),
+        '/viewschedule': (context) => ReviewScheduleScreen(),
         '/notifications': (context) => NotificationsPage(),
         '/settings': (context) => AccountSettingsPage(),
         '/logout': (context) => LogoutModalDemo(),

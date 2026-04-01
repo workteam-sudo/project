@@ -33,7 +33,7 @@ class AdmissionDetailsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Patient Summary Card
-              _buildPatientSummaryCard(),
+              _buildPatientSummaryCard(context),
               const SizedBox(height: 20),
 
               // 2. Ward & Room Card
@@ -59,7 +59,7 @@ class AdmissionDetailsPage extends StatelessWidget {
   }
 
   // --- Widget: Patient Summary ---
-  Widget _buildPatientSummaryCard() {
+  Widget _buildPatientSummaryCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -125,7 +125,9 @@ class AdmissionDetailsPage extends StatelessWidget {
                 SizedBox(
                   width: 120,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/patientprofile');
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF007AFF),
                       foregroundColor: Colors.white,

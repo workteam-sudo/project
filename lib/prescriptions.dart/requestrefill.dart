@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/patientdash.dart/dashboard.dart';
 
 // Define colors as global constants
 const Color primaryBlue = Color(0xFF0056D2);
@@ -282,6 +283,13 @@ class _RequestRefillScreenState extends State<RequestRefillScreen> {
                   ),
                   child: ElevatedButton(
                     onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientDashboard(),
+                        ),
+                        (route) => false,
+                      );
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(

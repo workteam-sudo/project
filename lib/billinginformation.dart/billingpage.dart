@@ -34,12 +34,14 @@ class BillingInformationPage extends StatelessWidget {
           ],
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.black87),
-            onPressed: () {},
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.filter_list, color: Colors.black87),
+        //     onPressed: () {
+        //       Navigator.pushNamed(context, '/viewdetails');
+        //     },
+        //   ),
+        // ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -135,11 +137,14 @@ class BillingInformationPage extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () {
-        if (invoiceNumber == "#INV-1024") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const BillDetailsPage()),
-          );
+        if (buttonTitle == "View Details") {
+          Navigator.pushNamed(context, '/viewdetails');
+        } else if (buttonTitle == "View Receipt") {
+          Navigator.pushNamed(context, '/viewreceipt');
+        } else if (buttonTitle == "Send Reminder") {
+          Navigator.pushNamed(context, '/sendreminder');
+        } else if (buttonTitle == "View Schedule") {
+          Navigator.pushNamed(context, '/viewschedule');
         }
       },
       child: Container(
@@ -268,7 +273,17 @@ class BillingInformationPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (buttonTitle == "View Details") {
+                    Navigator.pushNamed(context, '/viewdetails');
+                  } else if (buttonTitle == "View Receipt") {
+                    Navigator.pushNamed(context, '/viewreceipt');
+                  } else if (buttonTitle == "Send Reminder") {
+                    Navigator.pushNamed(context, '/sendreminder');
+                  } else if (buttonTitle == "View Schedule") {
+                    Navigator.pushNamed(context, '/viewschedule');
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   foregroundColor: Colors.white,

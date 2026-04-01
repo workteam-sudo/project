@@ -221,25 +221,22 @@ class PrescriptionCard extends StatelessWidget {
           ),
 
           // View Details Button
-          Flexible(
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4A90E2), // Soft Blue
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/prescdetail');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4A90E2), // Soft Blue
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                "View Details",
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            child: const Text(
+              "View Details",
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
         ],

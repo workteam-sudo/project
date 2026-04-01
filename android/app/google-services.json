@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "706934367462",
+    "project_id": "hospital-management-syst-f518c",
+    "storage_bucket": "hospital-management-syst-f518c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706934367462:android:7ae0102ff5c32f460e0727",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCperdB1-9256990c9hBWKDBwoJOQvofeI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
