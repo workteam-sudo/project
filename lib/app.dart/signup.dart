@@ -180,7 +180,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                     ),
 
-                    SizedBox(height: 40),
+                    SizedBox(height: 50 ),
 
                     // 🔥 NAME FIELD (Always visible)
                     _buildSignupCard(
