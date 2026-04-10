@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app.dart/screens.dart';
+// import 'package:flutter_application_1/app.dart/screens.dart';
 import 'package:flutter_application_1/patientdash.dart/dashboard.dart';
 
 class CreateNewPasswordScreen extends StatefulWidget {
@@ -89,23 +89,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         ),
                       ),
                     ),
-                    // const SizedBox(height: 24),
 
-                    // 2. Lock/Security Icon
-                    // Center(
-                    //   child: Container(
-                    //     padding: const EdgeInsets.all(16),
-                    //     decoration: BoxDecoration(
-                    //       color: primaryTeal.withOpacity(0.1),
-                    //       shape: BoxShape.circle,
-                    //     ),
-                    //     child: const Icon(
-                    //       Icons.lock_outline_rounded,
-                    //       color: primaryTeal,
-                    //       size: 40,
-                    //     ),
-                    //   ),
-                    // ),
                     const SizedBox(height: 20),
 
                     // 3. Title: "Reset Password"
