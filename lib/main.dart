@@ -1,8 +1,13 @@
+// ADD THESE 2 LINES HERE (after your existing imports)
+import 'app.dart/login.dart';
+import 'app.dart/signup.dart';
+
 import 'package:flutter/material.dart';
+
 import 'package:flutter_application_1/admissiondetail.dart/admissionpage.dart';
 import 'package:flutter_application_1/admissiondetail.dart/editprofile.dart';
 import 'package:flutter_application_1/admissiondetail.dart/patientprofile.dart';
-import 'package:flutter_application_1/app.dart/screens.dart';
+// import 'package:flutter_application_1/app.dart/screens.dart';
 import 'package:flutter_application_1/appointments.dart/bookappoint.dart';
 import 'package:flutter_application_1/authentication.dart/verifycode.dart';
 import 'package:flutter_application_1/appointments.dart/appointment.dart';
@@ -43,6 +48,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: AuthScreen(),
       routes: {
+        '/signup': (context) => SignupPage(),
         '/forgot': (context) => Forgotpassword(),
         '/verifycode': (context) => VerifyIdentityScreen(),
         '/newpassword': (context) => CreateNewPasswordScreen(),
@@ -72,6 +78,79 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => AccountSettingsPage(),
         '/logout': (context) => LogoutModalDemo(),
       },
+    );
+  }
+}
+
+class AuthScreen extends StatelessWidget {
+  const AuthScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.local_hospital, size: 100, color: Colors.teal),
+                    SizedBox(height: 20),
+                    Text(
+                      "Hospital Management System",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      minimumSize: Size(double.infinity, 60),
+                    ),
+                    child: Text(
+                      'LOGIN',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage()),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 60),
+                    ),
+                    child: Text(
+                      'SIGN UP',
+                      style: TextStyle(fontSize: 20, color: Colors.teal),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

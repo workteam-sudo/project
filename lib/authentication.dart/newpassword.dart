@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app.dart/screens.dart';
+import 'package:flutter_application_1/patientdash.dart/dashboard.dart';
 
 class CreateNewPasswordScreen extends StatefulWidget {
   const CreateNewPasswordScreen({super.key});
@@ -301,7 +302,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AuthScreen(),
+                              builder: (context) => PatientDashboard(),
                             ),
                             (route) => false,
                           );
