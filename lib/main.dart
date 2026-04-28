@@ -1,4 +1,27 @@
 // ADD THESE 2 LINES HERE (after your existing imports)
+import 'package:flutter_application_1/addmissionandrecomendation.dart/addandrec.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/admissioncomplete.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/admissionqueue.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/exportanalyticsaddqueue.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/generatereportaddqueue.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/icu.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/patientintake.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/patientlistrecosubmit.dart';
+import 'package:flutter_application_1/addmissionandrecomendation.dart/recomendationsubmitted.dart';
+import 'package:flutter_application_1/dandp.dart/clinicnewentry.dart';
+import 'package:flutter_application_1/dandp.dart/diagnosisandp.dart';
+import 'package:flutter_application_1/dandp.dart/export.dart';
+import 'package:flutter_application_1/dandp.dart/exportready.dart';
+import 'package:flutter_application_1/dandp.dart/newscript.dart';
+import 'package:flutter_application_1/dandp.dart/patientclinichistory.dart';
+import 'package:flutter_application_1/dandp.dart/script.dart';
+import 'package:flutter_application_1/doctordashboard.dart/dashboard.dart';
+import 'package:flutter_application_1/drmedicalreports.dart/exportpdf.dart';
+import 'package:flutter_application_1/drmedicalreports.dart/medical%20records.dart';
+import 'package:flutter_application_1/drmedicalreports.dart/pdfready.dart';
+import 'package:flutter_application_1/ptlist.dart/patienthistory.dart';
+import 'package:flutter_application_1/ptlist.dart/patientlist.dart';
+
 import 'app.dart/login.dart';
 import 'app.dart/signup.dart';
 
@@ -77,6 +100,34 @@ class MyApp extends StatelessWidget {
         '/notifications': (context) => NotificationsPage(),
         '/settings': (context) => AccountSettingsPage(),
         '/logout': (context) => LogoutModalDemo(),
+        '/doctordashboard':(context) => DoctorDashboard(),
+        '/patientlist': (context) => PatientListScreen(),
+        '/pateintprofile':(context) => PatientProfileScreen(),
+        '/pateinthistory.dart': (context) => ClinicalTimelineDashboard(),
+        '/diagnosis': (context) => DiagnosisScreen(),
+        '/ patientclinichistory': (context) => PatientClinicalTimelineScreen(),
+        '/clinicnewentry.dart': (context) => NewEntryScreen(),
+        '/export.dart': (context) => ExportRecordsScreen(),
+        '/exportready.dart': (context) => ExportReadyScreen(),
+        '/script.dart': (context) => ScriptsDashboardScreen(),
+        '/newscript.dart': (context) => CreatePrescriptionScreen(),
+        '/admissionrecommendation': (context) => ClinicalDashboard(),
+        '/recomendationsubmitted': (context) => ConfirmationScreen(),
+        '/admissionqueue':(context) => AdmissionQueueScreen(),
+        '/exportanalyticsaddqueue.dart':(context) => AnalyticsDashboard(),
+        '/generatereportaddqueue.adrt':(context)=> ReportPreviewScreen(),
+        '/pateintintake.dart':(context) => AdmissionDashboard(),
+        '/processadmissionintake.dart':(context) => AdmissionDashboard(),
+        '/admissioncomplete.dart':(context) => AdmissionConfirmedScreen(),
+        '/patientlistrecosubmit.dart': (context) => PatientRegistryScreen(),
+        '/icu.dart': (context) => ICUDashboard(),
+        '/drmedicalrecords.dart':(context) => MedicalRecordsPage(),
+        '/labtestview.dart':(context) => LabResultsScreen(),
+        '/exportpdf.dart': (context)=> ExportPdfScreen(),
+        '/pdfready.dart': (context) =>DownloadReadyScreen(),
+
+
+
       },
     );
   }

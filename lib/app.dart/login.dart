@@ -6,6 +6,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();  // ✅ ADD THIS LINE
   bool _isPatientSelected = true;
   bool _patientPasswordVisible = true;
   bool _doctorPasswordVisible = true;
@@ -70,6 +71,7 @@ class _LoginPageState extends State<LoginPage> {
 
               Padding(
                 padding: EdgeInsets.all(30),
+                child: Form(key: _formKey,
                 child: Column(
                   children: [
                     // Patient/Doctor Toggle
@@ -267,17 +269,18 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
+                          if(_formKey.currentState!.validate()){
+                    
                           if (_isPatientSelected) {
                             Navigator.pushReplacementNamed(
                               context,
                               '/dashboard',
                             );
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Doctor Dashboard Coming Soon!'),
-                              ),
-                            );
+                            Navigator.pushReplacementNamed(context,'/doctordashboard');
+                              
+                          
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -327,6 +330,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
+              ),
               ),
             ],
           ),
