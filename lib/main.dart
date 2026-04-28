@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // ADD THESE 2 LINES HERE (after your existing imports)
 import 'package:flutter_application_1/addmissionandrecomendation.dart/addandrec.dart';
 import 'package:flutter_application_1/addmissionandrecomendation.dart/admissioncomplete.dart';
@@ -22,6 +23,8 @@ import 'package:flutter_application_1/drmedicalreports.dart/pdfready.dart';
 import 'package:flutter_application_1/ptlist.dart/patienthistory.dart';
 import 'package:flutter_application_1/ptlist.dart/patientlist.dart';
 
+=======
+>>>>>>> 08303efc0d9bec292138672d23decea99a1b692f
 import 'app.dart/login.dart';
 import 'app.dart/signup.dart';
 
