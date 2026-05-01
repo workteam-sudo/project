@@ -44,12 +44,7 @@ class _SignupPageState extends State<SignupPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created. Verify your email before login.'),
-        ),
-      );
-      Navigator.pushReplacementNamed(context, '/');
+      await _showVerifyEmailDialog();
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -60,6 +55,30 @@ class _SignupPageState extends State<SignupPage> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _showVerifyEmailDialog() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Verify Your Email'),
+          content: const Text(
+            'Your account has been created. Please verify your email address from your inbox before logging in.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacementNamed(this.context, '/');
+              },
+              child: const Text('OK, GO TO LOGIN'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
