@@ -1,412 +1,235 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/authentication.dart/auth_service.dart';
 
 class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
+
   @override
-  _SignupPageState createState() => _SignupPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
 class _SignupPageState extends State<SignupPage> {
-  bool _isPatientSelected = true;
-  bool _passwordVisible = true;
-  bool _confirmPasswordVisible = true;
-
-  // Controllers for SEPARATE fields
+  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _patientEmailController = TextEditingController();
-  final _patientPasswordController = TextEditingController();
-  final _patientConfirmPasswordController = TextEditingController();
-  final _doctorEmailController = TextEditingController();
-  final _doctorPasswordController = TextEditingController();
-  final _doctorConfirmPasswordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
+
+  bool _isPatientSelected = true;
+  bool _isLoading = false;
+  bool _passwordVisible = false;
+  bool _confirmPasswordVisible = false;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _patientEmailController.dispose();
-    _patientPasswordController.dispose();
-    _patientConfirmPasswordController.dispose();
-    _doctorEmailController.dispose();
-    _doctorPasswordController.dispose();
-    _doctorConfirmPasswordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignup() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+
+    try {
+      await _authService.signUp(
+        fullName: _nameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        role: _isPatientSelected ? UserRole.patient : UserRole.doctor,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account created. Verify your email before login.'),
+        ),
+      );
+      Navigator.pushReplacementNamed(context, '/');
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_friendlySignupError(e))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(title: const Text('Create Account')),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // 🔥 HOSPITAL LOGO + HEADER
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.teal.shade600, Colors.teal.shade400],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _buildRoleToggle(),
+                const SizedBox(height: 20),
+                _buildField(
+                  controller: _nameController,
+                  label: 'Full Name',
+                  icon: Icons.person_outline,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Name is required';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildField(
+                  controller: _emailController,
+                  label: _isPatientSelected ? 'Patient Email' : 'Doctor Email',
+                  icon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Email is required';
+                    if (!value.contains('@')) return 'Enter a valid email';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  icon: Icons.lock_outline,
+                  obscureText: !_passwordVisible,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Password is required';
+                    if (value.length < 6) return 'Password must be at least 6 characters';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildField(
+                  controller: _confirmPasswordController,
+                  label: 'Confirm Password',
+                  icon: Icons.lock_outline,
+                  obscureText: !_confirmPasswordVisible,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _confirmPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () => setState(
+                      () => _confirmPasswordVisible = !_confirmPasswordVisible,
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Confirm your password';
+                    if (value != _passwordController.text) return 'Passwords do not match';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSignup,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              _isPatientSelected
+                                  ? 'SIGN UP AS PATIENT'
+                                  : 'SIGN UP AS DOCTOR',
+                            ),
+                    ),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Icon(Icons.local_hospital, size: 80, color: Colors.white),
-                    SizedBox(height: 20),
-                    Text(
-                      'Hospital Management',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      'System',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => Navigator.pushReplacementNamed(context, '/'),
+                  child: const Text('Already have an account? Login'),
                 ),
-              ),
-
-              Padding(
-                padding: EdgeInsets.all(30),
-                child: Column(
-                  children: [
-                    // Patient/Doctor Toggle
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _isPatientSelected = true),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 18,
-                                  horizontal: 20,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _isPatientSelected
-                                      ? Colors.teal
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.person,
-                                      color: _isPatientSelected
-                                          ? Colors.white
-                                          : Color(0xFF64748B),
-                                      size: 22,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Patient',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: _isPatientSelected
-                                            ? Colors.white
-                                            : Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _isPatientSelected = false),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 18,
-                                  horizontal: 20,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: !_isPatientSelected
-                                      ? Colors.teal
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.local_hospital_outlined,
-                                      color: !_isPatientSelected
-                                          ? Colors.white
-                                          : Color(0xFF64748B),
-                                      size: 22,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Doctor',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: !_isPatientSelected
-                                            ? Colors.white
-                                            : Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 50 ),
-
-                    // 🔥 NAME FIELD (Always visible)
-                    _buildSignupCard(
-                      context,
-                      'Full Name',
-                      _nameController,
-                      Icons.person_outline,
-                      false,
-                    ),
-
-                    SizedBox(height: 20),
-
-                    // 🔥 PATIENT FIELDS
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                      child: _isPatientSelected
-                          ? _buildSignupCard(
-                              context,
-                              'Patient Email',
-                              _patientEmailController,
-                              Icons.email_outlined,
-                              false,
-                            )
-                          : SizedBox(),
-                    ),
-
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                      child: _isPatientSelected
-                          ? _buildSignupCard(
-                              context,
-                              'Patient Password',
-                              _patientPasswordController,
-                              Icons.lock_outline,
-                              true,
-                              passwordVisible: _passwordVisible,
-                              onVisibilityChanged: () => setState(
-                                () => _passwordVisible = !_passwordVisible,
-                              ),
-                            )
-                          : SizedBox(),
-                    ),
-
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                      child: _isPatientSelected
-                          ? _buildSignupCard(
-                              context,
-                              'Confirm Password',
-                              _patientConfirmPasswordController,
-                              Icons.lock_outline,
-                              true,
-                              passwordVisible: _confirmPasswordVisible,
-                              onVisibilityChanged: () => setState(
-                                () => _confirmPasswordVisible =
-                                    !_confirmPasswordVisible,
-                              ),
-                            )
-                          : SizedBox(height: 20),
-                    ),
-
-                    SizedBox(),
-
-                    // 🔥 DOCTOR FIELDS
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                      child: !_isPatientSelected
-                          ? _buildSignupCard(
-                              context,
-                              'Doctor Email',
-                              _doctorEmailController,
-                              Icons.email_outlined,
-                              false,
-                            )
-                          : SizedBox(),
-                    ),
-
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                      child: !_isPatientSelected
-                          ? _buildSignupCard(
-                              context,
-                              'Doctor Password',
-                              _doctorPasswordController,
-                              Icons.lock_outline,
-                              true,
-                              passwordVisible: _passwordVisible,
-                              onVisibilityChanged: () => setState(
-                                () => _passwordVisible = !_passwordVisible,
-                              ),
-                            )
-                          : SizedBox(),
-                    ),
-
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                      child: !_isPatientSelected
-                          ? _buildSignupCard(
-                              context,
-                              'Confirm Password',
-                              _doctorConfirmPasswordController,
-                              Icons.lock_outline,
-                              true,
-                              passwordVisible: _confirmPasswordVisible,
-                              onVisibilityChanged: () => setState(
-                                () => _confirmPasswordVisible =
-                                    !_confirmPasswordVisible,
-                              ),
-                            )
-                          : SizedBox(),
-                    ),
-
-                    SizedBox(height: 40),
-
-                    // Sign Up Button
-                    Container(
-                      width: double.infinity,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.teal.shade500, Colors.teal.shade600],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.teal.withOpacity(0.3),
-                            blurRadius: 15,
-                            offset: Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // No logic - just show message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                _isPatientSelected
-                                    ? 'Patient signup coming soon!'
-                                    : 'Doctor signup coming soon!',
-                              ),
-                              backgroundColor: Colors.teal,
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Text(
-                          _isPatientSelected
-                              ? 'SIGN UP AS PATIENT'
-                              : 'SIGN UP AS DOCTOR',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // 🔥 Custom Signup Card Widget
-  Widget _buildSignupCard(
-    BuildContext context,
-    String label,
-    TextEditingController controller,
-    IconData icon,
-    bool isPassword, {
-    bool passwordVisible = true,
-    VoidCallback? onVisibilityChanged,
-  }) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 20),
-      child: TextField(
-        controller: controller,
-        obscureText: isPassword ? !passwordVisible : false,
-        keyboardType: label.contains('Email')
-            ? TextInputType.emailAddress
-            : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon, color: Colors.teal.shade600),
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(
-                    passwordVisible ? Icons.visibility_off : Icons.visibility,
-                  ),
-                  onPressed: onVisibilityChanged,
-                )
-              : null,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+  Widget _buildRoleToggle() {
+    return Row(
+      children: [
+        Expanded(
+          child: ChoiceChip(
+            label: const Text('Patient'),
+            selected: _isPatientSelected,
+            onSelected: (_) => setState(() => _isPatientSelected = true),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.grey.shade200),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.teal.shade400, width: 2),
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ChoiceChip(
+            label: const Text('Doctor'),
+            selected: !_isPatientSelected,
+            onSelected: (_) => setState(() => _isPatientSelected = false),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required FormFieldValidator<String> validator,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    Widget? suffixIcon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        suffixIcon: suffixIcon,
+        border: const OutlineInputBorder(),
       ),
     );
+  }
+
+  String _friendlySignupError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'operation-not-allowed':
+        return 'Email/password sign-up is disabled in Firebase Auth settings.';
+      case 'email-already-in-use':
+        return 'This email is already registered. Please login instead.';
+      case 'invalid-email':
+        return 'The email address format is invalid.';
+      case 'weak-password':
+        return 'Use a stronger password (at least 6 characters).';
+      case 'profile-write-failed':
+        return e.message ?? 'Could not save profile data to Firestore.';
+      case 'network-request-failed':
+        return 'Network error. Check your internet connection and try again.';
+      default:
+        return e.message ?? 'Signup failed. Please try again.';
+    }
   }
 }

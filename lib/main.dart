@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-// ADD THESE 2 LINES HERE (after your existing imports)
 import 'package:flutter_application_1/addmissionandrecomendation.dart/addandrec.dart';
 import 'package:flutter_application_1/addmissionandrecomendation.dart/admissioncomplete.dart';
 import 'package:flutter_application_1/addmissionandrecomendation.dart/admissionqueue.dart';
@@ -22,11 +20,9 @@ import 'package:flutter_application_1/drmedicalreports.dart/medical%20records.da
 import 'package:flutter_application_1/drmedicalreports.dart/pdfready.dart';
 import 'package:flutter_application_1/ptlist.dart/patienthistory.dart';
 import 'package:flutter_application_1/ptlist.dart/patientlist.dart';
-
-=======
->>>>>>> 08303efc0d9bec292138672d23decea99a1b692f
 import 'app.dart/login.dart';
 import 'app.dart/signup.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 
@@ -59,9 +55,14 @@ import 'package:flutter_application_1/prescriptions.dart/requestrefill.dart';
 import 'package:flutter_application_1/settings.dart/settingpage.dart';
 import 'authentication.dart/forgotpassword.dart';
 import 'authentication.dart/newpassword.dart';
+import 'firebase_options.dart';
 
 // import 'app.dart/screens.dart';
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
