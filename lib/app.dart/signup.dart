@@ -49,7 +49,7 @@ class _SignupPageState extends State<SignupPage> {
           content: Text('Account created. Verify your email before login.'),
         ),
       );
-      Navigator.pushReplacementNamed(context, '/');
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

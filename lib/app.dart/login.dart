@@ -31,15 +31,14 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      final role = await _authService.signIn(
+      await _authService.signIn(
         email: _emailController.text,
         password: _passwordController.text,
         selectedRole: _isPatientSelected ? UserRole.patient : UserRole.doctor,
       );
 
       if (!mounted) return;
-      final route = role == UserRole.doctor ? '/doctordashboard' : '/dashboard';
-      Navigator.pushNamedAndRemoveUntil(context, route, (_) => false);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       setState(() => _lastAuthErrorCode = e.code);

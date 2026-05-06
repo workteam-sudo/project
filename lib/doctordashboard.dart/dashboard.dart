@@ -1,4 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/appointments.dart/appointment_service.dart';
+import 'package:flutter_application_1/authentication.dart/logout_helper.dart';
+import 'package:flutter_application_1/widgets/drawer_profile_header.dart';
 
 class DoctorDashboard extends StatelessWidget {
   const DoctorDashboard({super.key});
@@ -16,13 +21,13 @@ class DoctorDashboard extends StatelessWidget {
             children: [
               _buildHeader(context),
               const SizedBox(height: 20),
-              _buildWelcomeCard(),
+              _buildWelcomeCard(context),
               const SizedBox(height: 25),
-              _buildStatsRow(),
+              _buildStatsRow(context),
               const SizedBox(height: 30),
-              _buildTodayAppointments(),
+              _buildTodayAppointments(context),
               const SizedBox(height: 30),
-              _buildQuickActions(),
+              _buildQuickActions(context),
               const SizedBox(height: 40),
             ],
           ),
@@ -63,26 +68,34 @@ class DoctorDashboard extends StatelessWidget {
             color: Color(0xFF2C3E50),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+            onTap: () => Navigator.pushNamed(context, '/notifications'),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ],
+              child: const Icon(Icons.notifications_none, color: Color(0xFF2C3E50)),
+            ),
           ),
-          child: const Icon(Icons.notifications_none, color: Color(0xFF2C3E50)),
         ),
       ],
     );
   }
 
-  Widget _buildWelcomeCard() {
+  Widget _buildWelcomeCard(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -97,93 +110,139 @@ class DoctorDashboard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 35,
-            backgroundColor: Color(0xFFE9F2FB),
-            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=5'),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Welcome, Dr. Emily",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "ID: #DR001 • Internal Medicine",
-                  style: TextStyle(fontSize: 13, color: Color(0xFF95A5A6)),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF27AE60).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "●",
-                        style: TextStyle(
-                          color: Color(0xFF27AE60),
-                          fontSize: 10,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        "ONLINE",
-                        style: TextStyle(
-                          color: Color(0xFF27AE60),
+      child: uid == null
+          ? const Text('Not signed in')
+          : StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .snapshots(),
+              builder: (context, snap) {
+                final name = snap.data?.data()?['fullName'] as String? ?? 'Doctor';
+                final shortId = uid.length > 6 ? uid.substring(0, 6) : uid;
+                final displayName =
+                    name.toLowerCase().startsWith('dr') ? name : 'Dr. $name';
+                return Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 35,
+                      backgroundColor: const Color(0xFFE9F2FB),
+                      child: Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : 'D',
+                        style: const TextStyle(
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          color: Color(0xFF2E75B6),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome, $displayName',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2C3E50),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'ID: #$shortId',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF95A5A6),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF27AE60).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "●",
+                                  style: TextStyle(
+                                    color: Color(0xFF27AE60),
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  "ONLINE",
+                                  style: TextStyle(
+                                    color: Color(0xFF27AE60),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildStatsRow() {
-    return Row(
-      children: [
-        _buildStatCard(
-          Icons.people,
-          "24",
-          "Today's Patients",
-          const Color(0xFF2E75B6),
-        ),
-        _buildStatCard(
-          Icons.schedule,
-          "8",
-          "Pending Appointments",
-          const Color(0xFFE74C3C),
-        ),
-        _buildStatCard(
-          Icons.assignment,
-          "15",
-          "New Prescriptions",
-          const Color(0xFF27AE60),
-        ),
-      ],
+  Widget _buildStatsRow(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      return const SizedBox.shrink();
+    }
+    final svc = AppointmentService();
+    return StreamBuilder<List<Appointment>>(
+      stream: svc.watchDoctorAppointments(uid),
+      builder: (context, snap) {
+        final list = snap.data ?? const <Appointment>[];
+        final today = AppointmentService.todayCountForDoctor(list, uid);
+        final pending = AppointmentService.pendingCountForDoctor(list, uid);
+        final week = list
+            .where(
+              (a) =>
+                  a.doctorId == uid &&
+                  a.scheduledAt.isAfter(
+                    DateTime.now().subtract(const Duration(days: 7)),
+                  ),
+            )
+            .length;
+        return Row(
+          children: [
+            _buildStatCard(
+              Icons.people,
+              snap.hasData ? '$today' : '—',
+              "Today's Patients",
+              const Color(0xFF2E75B6),
+            ),
+            _buildStatCard(
+              Icons.schedule,
+              snap.hasData ? '$pending' : '—',
+              "Pending Appointments",
+              const Color(0xFFE74C3C),
+            ),
+            _buildStatCard(
+              Icons.assignment,
+              snap.hasData ? '$week' : '—',
+              "Active (7 days)",
+              const Color(0xFF27AE60),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -231,47 +290,101 @@ class DoctorDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildTodayAppointments() {
+  Widget _buildTodayAppointments(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    final svc = AppointmentService();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Today's Appointments",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2C3E50),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Today's Appointments",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2C3E50),
+              ),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/doctorappointments'),
+              child: const Text('Manage all'),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+            onTap: () =>
+                Navigator.pushNamed(context, '/doctorappointments'),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              _buildAppointmentItem("John Doe", "10:00 AM", "Consultation"),
-              const Divider(height: 30),
-              _buildAppointmentItem("Sarah Wilson", "11:30 AM", "Follow-up"),
-              const Divider(height: 30),
-              _buildAppointmentItem("Michael Chen", "2:00 PM", "Checkup"),
-            ],
+              child: StreamBuilder<List<Appointment>>(
+                stream: svc.watchDoctorAppointments(uid),
+                builder: (context, snap) {
+                  if (snap.hasError) {
+                    return Text(
+                      'Could not load: ${snap.error}',
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    );
+                  }
+                  if (!snap.hasData) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  final today = AppointmentService.todayForDoctor(
+                    snap.data!,
+                    uid,
+                  );
+                  if (today.isEmpty) {
+                    return const Text(
+                      'No appointments today. Tap to add or manage.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF95A5A6),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (var i = 0; i < today.length; i++) ...[
+                        if (i > 0) const Divider(height: 30),
+                        _buildAppointmentRow(today[i]),
+                      ],
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildAppointmentItem(String name, String time, String type) {
+  Widget _buildAppointmentRow(Appointment a) {
     return Row(
       children: [
         Container(
@@ -288,7 +401,7 @@ class DoctorDashboard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                name,
+                a.patientName,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
@@ -296,7 +409,7 @@ class DoctorDashboard extends StatelessWidget {
                 ),
               ),
               Text(
-                time,
+                '${a.timeLabel} · ${a.status}',
                 style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF95A5A6),
@@ -312,7 +425,7 @@ class DoctorDashboard extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            type,
+            a.type,
             style: const TextStyle(
               fontSize: 12,
               color: Color(0xFF2E75B6),
@@ -324,7 +437,7 @@ class DoctorDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -341,6 +454,7 @@ class DoctorDashboard extends StatelessWidget {
           children: [
             Expanded(
               child: _buildActionCard(
+                context,
                 Icons.people,
                 "Patient List",
                 const Color(0xFF2E75B6),
@@ -350,6 +464,7 @@ class DoctorDashboard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _buildActionCard(
+                context,
                 Icons.medical_information,
                 "Diagnosis",
                 const Color(0xFF3498DB),
@@ -363,19 +478,21 @@ class DoctorDashboard extends StatelessWidget {
           children: [
             Expanded(
               child: _buildActionCard(
+                context,
                 Icons.medication,
                 "Prescription",
                 const Color(0xFF27AE60),
-                '/prescription',
+                '/script.dart',
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildActionCard(
+                context,
                 Icons.bedtime,
                 "Admission",
                 const Color(0xFFE74C3C),
-                '/admission',
+                '/admissionrecommendation',
               ),
             ),
           ],
@@ -384,11 +501,15 @@ class DoctorDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(IconData icon, String title, Color color, String route) {
+  Widget _buildActionCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    Color color,
+    String route,
+  ) {
     return GestureDetector(
-      onTap: () {
-        
-      },
+      onTap: () => Navigator.pushNamed(context, route),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -451,34 +572,7 @@ class DoctorSidebarMenu extends StatelessWidget {
               color: Color(0xFFF3F6FB),
               borderRadius: BorderRadius.only(topRight: Radius.circular(20)),
             ),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(
-                    'https://i.pravatar.cc/150?img=5',
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "Dr. Emily Stone",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50),
-                      ),
-                    ),
-                    Text(
-                      "Doctor",
-                      style: TextStyle(fontSize: 14, color: Color(0xFF95A5A6)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            child: const DrawerProfileHeader(roleLabel: 'Doctor'),
           ),
           Expanded(
             child: ListView(
@@ -486,10 +580,17 @@ class DoctorSidebarMenu extends StatelessWidget {
               children: [
                 _buildMenuItem(
                   context,
+                  Icons.event_note,
+                  "Appointments",
+                  '/doctorappointments',
+                  isSelected: false,
+                ),
+                _buildMenuItem(
+                  context,
                   Icons.people,
                   "Patient List",
                   '/patientlist',
-                  isSelected: true,
+                  isSelected: false,
                 ),
                 _buildMenuItem(
                   context,
@@ -554,7 +655,11 @@ class DoctorSidebarMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           onTap: () {
             Navigator.pop(context);
-            Navigator.pushNamed(context, route);
+            if (route == '/logout') {
+              confirmAndSignOut(context);
+            } else {
+              Navigator.pushNamed(context, route);
+            }
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/authentication.dart/logout_helper.dart';
+import 'package:flutter_application_1/widgets/drawer_profile_header.dart';
 
 class PatientDashboard extends StatelessWidget {
   const PatientDashboard({super.key});
@@ -16,13 +20,13 @@ class PatientDashboard extends StatelessWidget {
             children: [
               _buildHeader(context),
               const SizedBox(height: 20),
-              _buildWelcomeCard(),
+              _buildWelcomeCard(context),
               const SizedBox(height: 25),
               _buildStatsRow(),
               const SizedBox(height: 30),
               _buildTipsSection(),
               const SizedBox(height: 30),
-              _buildDoctorSection(),
+              _buildDoctorSection(context),
               const SizedBox(height: 40),
             ],
           ),
@@ -68,26 +72,34 @@ class PatientDashboard extends StatelessWidget {
             color: Color(0xFF2C3E50),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+            onTap: () => Navigator.pushNamed(context, '/notifications'),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ],
+              child: const Icon(Icons.notifications_none, color: Color(0xFF2C3E50)),
+            ),
           ),
-          child: const Icon(Icons.notifications_none, color: Color(0xFF2C3E50)),
         ),
       ],
     );
   }
 
-  Widget _buildWelcomeCard() {
+  Widget _buildWelcomeCard(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -102,68 +114,91 @@ class PatientDashboard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 35,
-            backgroundColor: Color(0xFFE9F2FB),
-            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Welcome, John",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "Patient ID: #5821 • Age 45",
-                  style: TextStyle(fontSize: 13, color: Color(0xFF95A5A6)),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF27AE60).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "●",
-                        style: TextStyle(
-                          color: Color(0xFF27AE60),
-                          fontSize: 10,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        "STATUS: STABLE",
-                        style: TextStyle(
-                          color: Color(0xFF27AE60),
+      child: uid == null
+          ? const Text('Not signed in')
+          : StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .snapshots(),
+              builder: (context, snap) {
+                final name =
+                    snap.data?.data()?['fullName'] as String? ?? 'Patient';
+                final shortId = uid.length > 6 ? uid.substring(0, 6) : uid;
+                return Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 35,
+                      backgroundColor: const Color(0xFFE9F2FB),
+                      child: Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : 'P',
+                        style: const TextStyle(
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          color: Color(0xFF2E75B6),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome, $name',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2C3E50),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Patient ID: #$shortId',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF95A5A6),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF27AE60).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "●",
+                                  style: TextStyle(
+                                    color: Color(0xFF27AE60),
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  "STATUS: STABLE",
+                                  style: TextStyle(
+                                    color: Color(0xFF27AE60),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -237,29 +272,30 @@ class PatientDashboard extends StatelessWidget {
   }
 
   Widget _buildTipsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Daily Health Tips",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2C3E50),
+    return Builder(
+      builder: (context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Daily Health Tips",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C3E50),
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                "Explore all",
-                style: TextStyle(color: Color(0xFF2E75B6)),
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/medicalrecord'),
+                child: const Text(
+                  "Explore all",
+                  style: TextStyle(color: Color(0xFF2E75B6)),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -283,6 +319,7 @@ class PatientDashboard extends StatelessWidget {
           ],
         ),
       ],
+    ),
     );
   }
 
@@ -343,7 +380,7 @@ class PatientDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildDoctorSection() {
+  Widget _buildDoctorSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -420,8 +457,14 @@ class PatientDashboard extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: ElevatedButton(
-                onPressed: () {},
+                child: ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Your care team will respond shortly.'),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2E75B6),
                   foregroundColor: Colors.white,
@@ -437,7 +480,8 @@ class PatientDashboard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/bookappoint'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF2E75B6),
                   side: const BorderSide(color: Color(0xFF2E75B6)),
@@ -478,34 +522,7 @@ class SidebarMenu extends StatelessWidget {
               color: Color(0xFFF3F6FB),
               borderRadius: BorderRadius.only(topRight: Radius.circular(20)),
             ),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(
-                    'https://i.pravatar.cc/150?img=11',
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "John Doe",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2C3E50),
-                      ),
-                    ),
-                    Text(
-                      "Patient",
-                      style: TextStyle(fontSize: 14, color: Color(0xFF95A5A6)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            child: const DrawerProfileHeader(roleLabel: 'Patient'),
           ),
           Expanded(
             child: ListView(
@@ -516,7 +533,7 @@ class SidebarMenu extends StatelessWidget {
                   Icons.calendar_today,
                   "Appointments",
                   '/appointment',
-                  isSelected: true,
+                  isSelected: false,
                 ),
                 _buildMenuItem(
                   context,
@@ -595,7 +612,11 @@ class SidebarMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           onTap: () {
             Navigator.pop(context);
-            Navigator.pushNamed(context, route);
+            if (route == '/logout') {
+              confirmAndSignOut(context);
+            } else {
+              Navigator.pushNamed(context, route);
+            }
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
