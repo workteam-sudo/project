@@ -5,11 +5,21 @@ class ClinicalTimelineDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Extract patient data from arguments
+    final Map<String, dynamic>? patientData = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    
+    final name = patientData?['fullName'] ?? patientData?['name'] ?? 'Unknown Patient';
+    final age = patientData?['age']?.toString() ?? 'N/A';
+    final gender = patientData?['gender'] ?? 'Not specified';
+    final pid = patientData?['id']?.toString().substring(0, 8) ?? 'Unknown';
+    final bloodType = patientData?['bloodType'] ?? 'Unknown';
+    final conditions = patientData?['conditions'] ?? 'No known conditions';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: const Text(
-          "Clinical Sanctuary",
+          "Patient History",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -19,17 +29,13 @@ class ClinicalTimelineDashboard extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Color(0xFF95A5A6)),
-          onPressed: () {},
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2C3E50), size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none, color: Color(0xFF95A5A6)),
-            onPressed: () {},
-          ),
-          CircleAvatar(
-            radius: 18,
-            backgroundImage: const AssetImage('assets/images/avatar.jpg'),
+            onPressed: () => Navigator.pushNamed(context, '/notifications'),
           ),
           const SizedBox(width: 16),
         ],
@@ -46,9 +52,9 @@ class ClinicalTimelineDashboard extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                "Patients > Elena Vance",
-                style: TextStyle(
+              child: Text(
+                "Patients > $name",
+                style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF95A5A6),
                   fontWeight: FontWeight.w500,
@@ -59,93 +65,120 @@ class ClinicalTimelineDashboard extends StatelessWidget {
 
             // Patient Overview
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Patient Picture
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: const Color(0xFF3A7BFF).withOpacity(0.1),
+                  backgroundImage: patientData?['image'] != null ? NetworkImage(patientData!['image']) : null,
+                  child: patientData?['image'] == null
+                      ? Text(
+                          name.toString().isNotEmpty ? name.toString()[0].toUpperCase() : 'P',
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF3A7BFF),
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 20),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Elena Vance",
-                        style: TextStyle(
-                          fontSize: 32,
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 28,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF2C3E50),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE9F2FB),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          "PID: 9021-X",
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF3A7BFF),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Text(
-                            "34y • A+",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF95A5A6),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFEF2F2),
+                              color: const Color(0xFFE9F2FB),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.warning_amber, color: Color(0xFFE74C3C), size: 16),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  "Penicillin Allergy",
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFFE74C3C),
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              "PID: #${pid.toUpperCase()}",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF3A7BFF),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            "$age • $gender • $bloodType",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF95A5A6),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.warning_amber, color: Color(0xFFE74C3C), size: 16),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                conditions,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFE74C3C),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Row(
+                // Action Buttons
+                Column(
                   children: [
                     OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/export.dart', arguments: patientData);
+                      },
                       icon: const Icon(Icons.download, size: 16),
                       label: const Text("Export"),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         side: BorderSide(color: Colors.grey[400]!),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(height: 8),
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/clinicnewentry.dart', arguments: patientData);
+                      },
                       icon: const Icon(Icons.add, size: 16),
                       label: const Text("New Entry"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF3A7BFF),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -168,14 +201,14 @@ class ClinicalTimelineDashboard extends StatelessWidget {
                   ),
                 ),
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushNamed(context, '/drmedicalrecords.dart'),
                   icon: const Icon(Icons.filter_list, size: 18),
                   label: const Text("Filter"),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            _buildTimeline(),
+            _buildTimeline(context),
 
             const SizedBox(height: 40),
 
@@ -231,7 +264,7 @@ class ClinicalTimelineDashboard extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushNamed(context, '/drmedicalrecords.dart'),
                   child: const Text("View All", style: TextStyle(color: Color(0xFF3A7BFF))),
                 ),
               ],
@@ -239,13 +272,13 @@ class ClinicalTimelineDashboard extends StatelessWidget {
             const SizedBox(height: 20),
             Row(
               children: [
-                Expanded(child: _buildQuickAction(Icons.note_alt, "Note")),
+                Expanded(child: _buildQuickAction(Icons.note_alt, "Note", () => Navigator.pushNamed(context, '/clinicnewentry.dart', arguments: patientData))),
                 const SizedBox(width: 16),
-                Expanded(child: _buildQuickAction(Icons.science, "Lab")),
+                Expanded(child: _buildQuickAction(Icons.science, "Lab", () => Navigator.pushNamed(context, '/labtestview.dart', arguments: patientData))),
                 const SizedBox(width: 16),
-                Expanded(child: _buildQuickAction(Icons.picture_as_pdf, "PDF")),
+                Expanded(child: _buildQuickAction(Icons.picture_as_pdf, "PDF", () => Navigator.pushNamed(context, '/exportpdf.dart', arguments: patientData))),
                 const SizedBox(width: 16),
-                Expanded(child: _buildQuickAction(Icons.calendar_today, "Visit")),
+                Expanded(child: _buildQuickAction(Icons.calendar_today, "Visit", () => Navigator.pushNamed(context, '/visdetail', arguments: patientData))),
               ],
             ),
             const SizedBox(height: 40),
@@ -263,7 +296,7 @@ class ClinicalTimelineDashboard extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushNamed(context, '/drmedicalrecords.dart'),
                   child: const Text("View All", style: TextStyle(color: Color(0xFF3A7BFF))),
                 ),
               ],
@@ -271,44 +304,30 @@ class ClinicalTimelineDashboard extends StatelessWidget {
             const SizedBox(height: 20),
             Row(
               children: [
-                Expanded(child: _buildFileCard("Lab_Report_Oct23.pdf", "Oct 24", Icons.picture_as_pdf)),
+                Expanded(child: _buildFileCard("Lab_Report_Oct23.pdf", "Oct 24", Icons.picture_as_pdf, () => Navigator.pushNamed(context, '/pdfready.dart'))),
                 const SizedBox(width: 16),
-                Expanded(child: _buildFileCard("Chest_XRay_Aug.jpg", "Aug 12", Icons.image)),
+                Expanded(child: _buildFileCard("Chest_XRay_Aug.jpg", "Aug 12", Icons.image, () => Navigator.pushNamed(context, '/drmedicalrecords.dart'))), // Linked to medical records
               ],
             ),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF3A7BFF),
-        unselectedItemColor: const Color(0xFF95A5A6),
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        currentIndex: 1,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.today), label: "Today"),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),
-          BottomNavigationBarItem(icon: Icon(Icons.medication), label: "Meds"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
-      ),
     );
   }
 
-  Widget _buildTimeline() {
+  Widget _buildTimeline(BuildContext context) {
     return Column(
       children: [
-        _buildTimelineEntry("OCT 24, 2023", "Quarterly Cardiovascular Review", "ROUTINE", "DIAGNOSIS", "View Full Notes"),
+        _buildTimelineEntry(context, "OCT 24, 2023", "Quarterly Cardiovascular Review", "ROUTINE", "DIAGNOSIS", "View Full Notes"),
         const SizedBox(height: 24),
-        _buildTimelineEntry("AUG 12, 2023", "Acute Respiratory Infection", "URGENT", "Rx Benzonatate 100mg", ""),
+        _buildTimelineEntry(context, "AUG 12, 2023", "Acute Respiratory Infection", "URGENT", "Rx Benzonatate 100mg", ""),
         const SizedBox(height: 24),
-        _buildTimelineEntry("MAY 05, 2023", "Annual Physical Examination", "SCREENING", "View Results (8)", ""),
+        _buildTimelineEntry(context, "MAY 05, 2023", "Annual Physical Examination", "SCREENING", "View Results (8)", ""),
       ],
     );
   }
 
-  Widget _buildTimelineEntry(String date, String title, String status, String footer, String link) {
+  Widget _buildTimelineEntry(BuildContext context, String date, String title, String status, String footer, String link) {
     return Stack(
       children: [
         Container(
@@ -402,7 +421,7 @@ class ClinicalTimelineDashboard extends StatelessWidget {
                   ),
                   if (link.isNotEmpty)
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.pushNamed(context, '/visdetail'),
                       child: Text(link, style: const TextStyle(color: Color(0xFF3A7BFF))),
                     ),
                 ],
@@ -490,9 +509,9 @@ class ClinicalTimelineDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickAction(IconData icon, String label) {
+  Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -524,9 +543,11 @@ class ClinicalTimelineDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildFileCard(String name, String date, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(20),
+  Widget _buildFileCard(String name, String date, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -578,6 +599,6 @@ class ClinicalTimelineDashboard extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

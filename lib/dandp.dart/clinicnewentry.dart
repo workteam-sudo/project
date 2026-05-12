@@ -1,8 +1,48 @@
 import 'package:flutter/material.dart';
 
-class NewEntryScreen extends StatelessWidget {
+class NewEntryScreen extends StatefulWidget {
+  @override
+  _NewEntryScreenState createState() => _NewEntryScreenState();
+}
+
+class _NewEntryScreenState extends State<NewEntryScreen> {
+  String selectedCategory = 'Note';
+  bool hasFile = false;
+  DateTime selectedDate = DateTime(2023, 11, 24);
+  TimeOfDay selectedTime = TimeOfDay(hour: 14, minute: 30);
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2025),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null && picked != selectedTime) {
+      setState(() {
+        selectedTime = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Extract patient data from arguments
+    final Map<String, dynamic>? patientData = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final patientName = patientData?['fullName'] ?? patientData?['name'] ?? 'Elena Rossi';
+
     return Scaffold(
       backgroundColor: Color(0xFFF5F7FA),
       appBar: AppBar(
@@ -13,7 +53,7 @@ class NewEntryScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Clinical Sanctuary',
+          'Hospital System',
           style: TextStyle(
             color: Color(0xFF3A7BFF),
             fontWeight: FontWeight.bold,
@@ -24,7 +64,7 @@ class NewEntryScreen extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(right: 16),
             child: Text(
-              'Patient: Elena Rossi',
+              'Patient: $patientName',
               style: TextStyle(
                 color: Colors.grey[700],
                 fontSize: 14,
@@ -47,17 +87,107 @@ class NewEntryScreen extends StatelessWidget {
             SizedBox(height: 32),
             _buildCategorySection(),
             SizedBox(height: 32),
+            _buildDynamicDetailsSection(),
+            SizedBox(height: 32),
             _buildDateTimeSection(),
             SizedBox(height: 32),
             _buildKeyFindingsSection(),
-            SizedBox(height: 32),
             _buildFileAttachmentSection(),
             SizedBox(height: 40),
-            _buildSaveButton(),
+            _buildSaveButton(context),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
+    );
+  }
+
+  Widget _buildDynamicDetailsSection() {
+    String title = '';
+    String hint = '';
+    IconData icon = Icons.edit_note;
+
+    switch (selectedCategory) {
+      case 'Note':
+        title = 'NOTE SUBJECT';
+        hint = 'e.g., General Observation';
+        icon = Icons.subject;
+        break;
+      case 'Lab':
+        title = 'LAB TEST NAME';
+        hint = 'e.g., Blood Glucose Level';
+        icon = Icons.biotech;
+        break;
+      case 'Visit':
+        title = 'VISIT REASON';
+        hint = 'e.g., Follow-up Appointment';
+        icon = Icons.meeting_room;
+        break;
+      case 'File':
+        title = 'DOCUMENT TITLE';
+        hint = 'e.g., Medical Certificate';
+        icon = Icons.description;
+        break;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Viewing recent ${selectedCategory}s...')),
+                );
+              },
+              icon: Icon(Icons.history, size: 16, color: Color(0xFF3A7BFF)),
+              label: Text(
+                'Recent',
+                style: TextStyle(color: Color(0xFF3A7BFF), fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: Color(0xFF3A7BFF), size: 24),
+              SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -104,22 +234,22 @@ class NewEntryScreen extends StatelessWidget {
             _buildCategoryButton(
               icon: Icons.description_outlined,
               label: 'Note',
-              isSelected: true,
+              isSelected: selectedCategory == 'Note',
             ),
             _buildCategoryButton(
               icon: Icons.science_outlined,
               label: 'Lab',
-              isSelected: false,
+              isSelected: selectedCategory == 'Lab',
             ),
             _buildCategoryButton(
               icon: Icons.medical_information_outlined,
               label: 'Visit',
-              isSelected: false,
+              isSelected: selectedCategory == 'Visit',
             ),
             _buildCategoryButton(
               icon: Icons.attach_file_outlined,
               label: 'File',
-              isSelected: false,
+              isSelected: selectedCategory == 'File',
             ),
           ],
         ),
@@ -133,7 +263,11 @@ class NewEntryScreen extends StatelessWidget {
     required bool isSelected,
   }) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        setState(() {
+          selectedCategory = label;
+        });
+      },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
@@ -184,42 +318,57 @@ class NewEntryScreen extends StatelessWidget {
         SizedBox(height: 16),
         Row(
           children: [
-            Expanded(child: _buildInputField('11/24/2023', Icons.calendar_today_outlined)),
+            Expanded(
+              child: _buildInputField(
+                '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}',
+                Icons.calendar_today_outlined,
+                onTap: () => _selectDate(context),
+              ),
+            ),
             SizedBox(width: 16),
-            Expanded(child: _buildInputField('02:30 PM', Icons.access_time_outlined)),
+            Expanded(
+              child: _buildInputField(
+                selectedTime.format(context),
+                Icons.access_time_outlined,
+                onTap: () => _selectTime(context),
+              ),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildInputField(String value, IconData icon) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
+  Widget _buildInputField(String value, IconData icon, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
               ),
             ),
-          ),
-          Icon(icon, color: Colors.grey[500], size: 20),
-        ],
+            Icon(icon, color: Colors.grey[500], size: 20),
+          ],
+        ),
       ),
     );
   }
@@ -245,11 +394,16 @@ class NewEntryScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.grey[200]!),
           ),
-          child: Text(
-            'Brief clinical summary…',
+          child: TextField(
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: 'Brief clinical summary…',
+              hintStyle: TextStyle(color: Colors.grey[500]),
+              border: InputBorder.none,
+            ),
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[500],
+              color: Colors.black87,
               height: 1.5,
             ),
           ),
@@ -272,7 +426,16 @@ class NewEntryScreen extends StatelessWidget {
         ),
         SizedBox(height: 16),
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            setState(() {
+              hasFile = !hasFile;
+            });
+            if (hasFile) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('File attached: report_v1.pdf')),
+              );
+            }
+          },
           child: Container(
             width: double.infinity,
             padding: EdgeInsets.all(20),
@@ -290,21 +453,25 @@ class NewEntryScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.attach_file_outlined, color: Colors.grey[500], size: 24),
+                Icon(
+                  hasFile ? Icons.insert_drive_file : Icons.attach_file_outlined,
+                  color: hasFile ? Color(0xFF3A7BFF) : Colors.grey[500],
+                  size: 24,
+                ),
                 SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    'No files attached',
+                    hasFile ? 'report_v1.pdf' : 'No files attached',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: hasFile ? Colors.black87 : Colors.grey[600],
                     ),
                   ),
                 ),
                 Text(
-                  'Add File',
+                  hasFile ? 'Remove' : 'Add File',
                   style: TextStyle(
-                    color: Color(0xFF3A7BFF),
+                    color: hasFile ? Colors.red : Color(0xFF3A7BFF),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -316,7 +483,7 @@ class NewEntryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 56,
@@ -339,7 +506,12 @@ class NewEntryScreen extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {},
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$selectedCategory entry saved successfully')),
+            );
+            Navigator.pop(context);
+          },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -356,47 +528,6 @@ class NewEntryScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigation() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        selectedItemColor: Colors.grey[600],
-        unselectedItemColor: Colors.grey[500],
-        currentIndex: 0,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.today_outlined),
-            label: 'Today',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medication_outlined),
-            label: 'Meds',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }

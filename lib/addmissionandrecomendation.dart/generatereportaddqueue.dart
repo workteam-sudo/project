@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 
-class ClinicalSanctuaryApp extends StatelessWidget {
+class HospitalSystemApp extends StatelessWidget {
+  const HospitalSystemApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clinical Sanctuary',
+      title: 'Hospital System',
       theme: ThemeData(
         fontFamily: 'Inter',
         primarySwatch: Colors.blue,
@@ -52,7 +53,7 @@ class ReportPreviewScreen extends StatelessWidget {
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back_ios_new, size: 18, color: Color(0xFF64748B)),
-                  onPressed: () {},
+                  onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                 ),
@@ -430,7 +431,7 @@ class ReportPreviewScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 20),
                         Text(
-                          'Sanctuary Analytics v4.2',
+                          'Hospital System Analytics v4.2',
                           style: TextStyle(
                             fontSize: 16,
                             color: Color(0xFF94A3B8),

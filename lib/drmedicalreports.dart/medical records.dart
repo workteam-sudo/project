@@ -14,7 +14,10 @@ class MedicalRecordsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: Icon(Icons.arrow_back, color: Colors.black),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           "Medical Records",
           style: TextStyle(color: Colors.black),
@@ -188,7 +191,9 @@ class MedicalRecordsPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/exportpdf.dart');
+                },
                 child: Text("View / Download Medical Report"),
               ),
             )

@@ -55,12 +55,11 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
             SizedBox(height: 32),
             _buildClinicalNotesSection(),
             SizedBox(height: 40),
-            _buildSaveButton(),
+            _buildSaveButton(context),
             SizedBox(height: 100),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
 
@@ -405,7 +404,7 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 56,
@@ -428,7 +427,12 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
-          onTap: () {},
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Prescription saved and sent successfully')),
+            );
+            Navigator.pop(context);
+          },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -449,56 +453,4 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: Offset(0, -4),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        selectedItemColor: Color(0xFF3A7BFF),
-        unselectedItemColor: Colors.grey[500],
-        currentIndex: 2,  // Scripts active
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline),
-            activeIcon: Icon(Icons.people),
-            label: 'Patients',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            activeIcon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Color(0xFF3A7BFF),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.medication, color: Colors.white, size: 20),
-            ),
-            label: 'Scripts',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      ),
-    );
-  }
 }

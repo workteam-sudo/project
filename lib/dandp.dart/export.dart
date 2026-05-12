@@ -13,7 +13,7 @@ class ExportRecordsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Clinical Sanctuary',
+          'Hospital System',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
@@ -38,13 +38,12 @@ class ExportRecordsScreen extends StatelessWidget {
             SizedBox(height: 32),
             _buildSecurityNotice(),
             SizedBox(height: 32),
-            _buildGenerateButton(),
+            _buildGenerateButton(context),
             SizedBox(height: 16),
             _buildFileSizeText(),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
 
@@ -284,7 +283,7 @@ class ExportRecordsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGenerateButton() {
+  Widget _buildGenerateButton(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 56,
@@ -307,7 +306,12 @@ class ExportRecordsScreen extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {},
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Export generated successfully')),
+            );
+            Navigator.pop(context);
+          },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -340,44 +344,4 @@ class ExportRecordsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        selectedItemColor: Color(0xFF3A7BFF),
-        unselectedItemColor: Colors.grey[500],
-        currentIndex: 3,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.today_outlined),
-            label: 'Today',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medication_outlined),
-            label: 'Meds',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -54,7 +54,7 @@ class _ScriptsDashboardScreenState extends State<ScriptsDashboardScreen> {
           ),
           SizedBox(width: 16),
           Text(
-            'Clinical Sanctuary',
+            'Hospital System',
             style: TextStyle(
               color: Color(0xFF3A7BFF),
               fontWeight: FontWeight.bold,

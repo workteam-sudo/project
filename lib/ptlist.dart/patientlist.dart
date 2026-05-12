@@ -1,7 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class PatientListScreen extends StatelessWidget {
+class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
+
+  @override
+  State<PatientListScreen> createState() => _PatientListScreenState();
+}
+
+class _PatientListScreenState extends State<PatientListScreen> {
+  String searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,175 +46,205 @@ class PatientListScreen extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Search Bar
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, color: Colors.grey[400], size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        "Search by name or ID…",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Stats & Sort
-              Row(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "TOTAL PATIENTS",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF95A5A6),
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const Text(
-                        "24",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF2C3E50),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
+                  // Search Bar
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE9F2FB),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.swap_vert, size: 16, color: Color(0xFF2E75B6)),
-                        const SizedBox(width: 4),
-                        const Text(
-                          "Sorted by Recent",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF2E75B6),
+                        Icon(Icons.search, color: Colors.grey[400], size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: (value) {
+                              setState(() {
+                                searchQuery = value.toLowerCase();
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: "Search by name or ID…",
+                              hintStyle: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[500],
+                              ),
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
+                        if (searchQuery.isNotEmpty)
+                          IconButton(
+                            icon: Icon(Icons.clear, color: Colors.grey[400], size: 20),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                searchQuery = '';
+                              });
+                            },
+                          ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
+            ),
 
-              // Patient Cards List
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 8, // Demo data
-                separatorBuilder: (context, index) => const SizedBox(height: 16),
-                itemBuilder: (context, index) => _buildPatientCard(context, index),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .where('role', isEqualTo: 'patient')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error loading patients'));
+                  }
+
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  var patients = snapshot.data!.docs;
+
+                  // Apply local search filtering
+                  if (searchQuery.isNotEmpty) {
+                    patients = patients.where((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final name = (data['fullName'] ?? data['name'] ?? '').toString().toLowerCase();
+                      final id = doc.id.toLowerCase();
+                      return name.contains(searchQuery) || id.contains(searchQuery);
+                    }).toList();
+                  }
+
+                  // Apply local sorting (e.g., sort by creation date or name if needed)
+                  // For now, they are just returned in default order from Firestore
+
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Stats & Sort
+                        Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "TOTAL PATIENTS",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF95A5A6),
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                Text(
+                                  "${patients.length}",
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF2C3E50),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE9F2FB),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.swap_vert, size: 16, color: Color(0xFF2E75B6)),
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    "Sorted by Recent",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF2E75B6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 28),
+
+                        if (patients.isEmpty)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40.0),
+                              child: Text(
+                                "No patients found.",
+                                style: TextStyle(color: Colors.grey, fontSize: 16),
+                              ),
+                            ),
+                          )
+                        else
+                          // Patient Cards List
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: patients.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 16),
+                            itemBuilder: (context, index) => _buildDynamicPatientCard(context, patients[index]),
+                          ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF2E75B6),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF2E75B6).withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
             ),
           ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white, size: 28),
         ),
       ),
     );
   }
 
-  Widget _buildPatientCard(BuildContext context, int index) {
-    final patients = [
-      {
-        'name': 'Jonathan Doe',
-        'age': '45',
-        'gender': 'Male',
-        'status': 'STABLE',
-        'statusColor': const Color(0xFF27AE60),
-        'conditions': 'Hypertension, Chronic Cough',
-        'lastVisit': 'Oct 12, 2024',
-        'image': 'android/assets/p1.avif'
-      },
-      {
-        'name': 'Sarah Wilson',
-        'age': '32',
-        'gender': 'Female',
-        'status': 'FOLLOW-UP',
-        'statusColor': const Color(0xFFF39C12),
-        'conditions': 'Diabetes Type 2',
-        'lastVisit': 'Oct 10, 2024',
-        'image': 'https://i.pravatar.cc/150?img=2',
-      },
-      {
-        'name': 'Michael Chen',
-        'age': '28',
-        'gender': 'Male',
-        'status': 'URGENT',
-        'statusColor': const Color(0xFFE74C3C),
-        'conditions': 'Fever, Headache',
-        'lastVisit': 'Oct 11, 2024',
-        'image': 'https://i.pravatar.cc/150?img=3',
-      },
-      {
-        'name': 'Emily Johnson',
-        'age': '52',
-        'gender': 'Female',
-        'status': 'STABLE',
-        'statusColor': const Color(0xFF27AE60),
-        'conditions': 'Arthritis',
-        'lastVisit': 'Oct 9, 2024',
-        'image': 'https://i.pravatar.cc/150?img=4',
-      },
-    ];
-
-    final patient = patients[index % patients.length];
+  Widget _buildDynamicPatientCard(BuildContext context, DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    final name = data['fullName'] ?? data['name'] ?? 'Unknown Patient';
+    final age = data['age']?.toString() ?? 'N/A';
+    final gender = data['gender'] ?? 'Not specified';
+    final conditions = data['conditions'] ?? 'No conditions listed';
+    final status = (data['status'] ?? 'STABLE').toString().toUpperCase();
+    
+    Color statusColor;
+    switch (status) {
+      case 'URGENT':
+      case 'CRITICAL':
+        statusColor = const Color(0xFFE74C3C);
+        break;
+      case 'FOLLOW-UP':
+        statusColor = const Color(0xFFF39C12);
+        break;
+      default:
+        statusColor = const Color(0xFF27AE60);
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -220,8 +265,15 @@ class PatientListScreen extends StatelessWidget {
           // Profile Image
           CircleAvatar(
             radius: 28,
-            backgroundImage:  AssetImage(patient['image'] as String), 
             backgroundColor: const Color(0xFFE9F2FB),
+            child: Text(
+              name.toString().isNotEmpty ? name.toString()[0].toUpperCase() : 'P',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E75B6),
+              ),
+            ),
           ),
           const SizedBox(width: 16),
 
@@ -234,7 +286,7 @@ class PatientListScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        patient['name'] as String,
+                        name,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -246,15 +298,15 @@ class PatientListScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                    color: (patient['statusColor'] as Color).withOpacity(0.1),
+                        color: statusColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        patient['status'] as String,
+                        status,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                         color: patient['statusColor'] as Color,
+                          color: statusColor,
                         ),
                       ),
                     ),
@@ -262,16 +314,16 @@ class PatientListScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "${patient['age']} • ${patient['gender']}",
-                  style: TextStyle(
+                  "$age • $gender",
+                  style: const TextStyle(
                     fontSize: 14,
-                    color: const Color(0xFF95A5A6),
+                    color: Color(0xFF95A5A6),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  patient['conditions'] as String,
-                  style: TextStyle(
+                  conditions,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF6C757D),
                     fontWeight: FontWeight.w500,
@@ -279,8 +331,8 @@ class PatientListScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "Last visit: ${patient['lastVisit']}",
-                  style: TextStyle(
+                  "ID: #${doc.id.substring(0, 8)}",
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF95A5A6),
                   ),
@@ -303,8 +355,8 @@ class PatientListScreen extends StatelessWidget {
                 ),
                 child: TextButton(
                   onPressed: () {
+                    // Navigate to profile and pass patient ID if needed
                     Navigator.pushNamed(context, '/patientprofile');
-                  
                   },
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
@@ -329,7 +381,12 @@ class PatientListScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                     // Route to history and pass patient data
+                     final patientData = Map<String, dynamic>.from(data);
+                     patientData['id'] = doc.id; // Include document ID
+                     Navigator.pushNamed(context, '/pateinthistory.dart', arguments: patientData);
+                  },
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.zero,

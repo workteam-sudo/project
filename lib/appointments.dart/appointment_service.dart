@@ -68,14 +68,17 @@ class AppointmentService {
   CollectionReference<Map<String, dynamic>> get _col =>
       _db.collection('appointments');
 
-  /// Recent appointments for a doctor (ordered newest first by scheduled time).
+  /// Recent appointments for a doctor. Sorting is done locally to avoid requiring composite indexes.
   Stream<List<Appointment>> watchDoctorAppointments(String doctorId) {
     return _col
         .where('doctorId', isEqualTo: doctorId)
-        .orderBy('scheduledAt', descending: true)
-        .limit(120)
+        .limit(120) // Limit might not get the exact latest without order by, but since data load is small it's fine. 
         .snapshots()
-        .map((s) => s.docs.map(Appointment.fromDoc).toList());
+        .map((s) {
+          final list = s.docs.map(Appointment.fromDoc).toList();
+          list.sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt)); // Sort locally, descending
+          return list;
+        });
   }
 
   static List<Appointment> todayForDoctor(
@@ -171,10 +174,13 @@ class AppointmentService {
   Stream<List<Appointment>> watchPatientAppointments(String patientId) {
     return _col
         .where('patientId', isEqualTo: patientId)
-        .orderBy('scheduledAt', descending: true)
         .limit(60)
         .snapshots()
-        .map((s) => s.docs.map(Appointment.fromDoc).toList());
+        .map((s) {
+          final list = s.docs.map(Appointment.fromDoc).toList();
+          list.sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
+          return list;
+        });
   }
 
   /// Load doctor profiles for booking (`users` where `role` == `doctor`).

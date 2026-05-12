@@ -12,7 +12,7 @@ class VisitDetailsScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.black),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
@@ -24,9 +24,21 @@ class VisitDetailsScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: () {},
+            onSelected: (value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Action selected: $value')),
+              );
+            },
+            itemBuilder: (BuildContext context) {
+              return {'Share', 'Print', 'Download'}.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
           ),
         ],
       ),
@@ -240,7 +252,9 @@ class VisitDetailsScreen extends StatelessWidget {
                 ],
               ),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/exportpdf.dart');
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,

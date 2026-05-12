@@ -18,6 +18,7 @@ import 'package:flutter_application_1/doctordashboard.dart/dashboard.dart';
 import 'package:flutter_application_1/drmedicalreports.dart/exportpdf.dart';
 import 'package:flutter_application_1/drmedicalreports.dart/medical%20records.dart';
 import 'package:flutter_application_1/drmedicalreports.dart/pdfready.dart';
+import 'package:flutter_application_1/drmedicalreports.dart/labtestview.dart' as doctor_lab;
 import 'package:flutter_application_1/ptlist.dart/patienthistory.dart';
 import 'package:flutter_application_1/ptlist.dart/patientlist.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -128,7 +129,7 @@ class MyApp extends StatelessWidget {
         '/patientlistrecosubmit.dart': (context) => PatientRegistryScreen(),
         '/icu.dart': (context) => ICUDashboard(),
         '/drmedicalrecords.dart':(context) => MedicalRecordsPage(),
-        '/labtestview.dart':(context) => LabResultsScreen(),
+        '/labtestview.dart':(context) => doctor_lab.LabResultsScreen(),
         '/exportpdf.dart': (context)=> ExportPdfScreen(),
         '/pdfready.dart': (context) =>DownloadReadyScreen(),
 

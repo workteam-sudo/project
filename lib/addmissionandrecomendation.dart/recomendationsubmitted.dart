@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clinical Sanctuary',
+      title: 'Hospital System',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Inter',
@@ -70,7 +70,7 @@ class ConfirmationScreen extends StatelessWidget {
         SizedBox(width: 16),
         Expanded(
           child: Text(
-            'Clinical Sanctuary',
+            'Hospital System',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w500,

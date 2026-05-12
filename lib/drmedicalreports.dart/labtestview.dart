@@ -5,6 +5,11 @@ class LabResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Extract patient data from arguments
+    final Map<String, dynamic>? patientData = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final patientName = patientData?['fullName'] ?? patientData?['name'] ?? 'Elena Vance';
+    final patientId = patientData?['id']?.toString().substring(0, 8) ?? 'PX-8842';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
 
@@ -14,7 +19,7 @@ class LabResultsScreen extends StatelessWidget {
         elevation: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF12639E)),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Lab Results",
@@ -24,6 +29,14 @@ class LabResultsScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Color(0xFF12639E)),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Refreshing lab results...')),
+              );
+            },
+          ),
           const CircleAvatar(
             backgroundImage: NetworkImage(
               "https://lh3.googleusercontent.com/aida-public/AB6AXuAy7dAvlCtBvMelD11T8lfFei0jaNnQP6WtiAOB5gjnFwGKdkEyHC-qXnuArHvHZrt297klq8eHHugVVAk3zvYjpxtxfx3kVb3E7EWY06RowrJsE4CyjbEkDK6OzmaB7EG9FcLF8TwMLrvgF3MR0b-RZgj4sxFHk-dQJaoUc4ZtPTF-1wZyPGWJunZZh4x1uvTBpCD2aeITjbwTTQFGQ-KssFjkpIu7KYWp6Din41G26J3TwYTm2n1StvtajC5M4bbwLCjzCTWk19M",
@@ -48,7 +61,7 @@ class LabResultsScreen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      "https://lh3.googleusercontent.com/aida-public/AB6AXuB5rdlUig5sVgbAcTCgJ6znRDbOYhRVtVfhHSGt9fE6bb3Uf6XtMIF8gOUZzPBRUyKv6wGvi0MyVBNFDmOvt2iQLKatjbFOyjTflXW4In58D7nO1aBSf7sJgJJ2Uq9gnXoGNKTgOoeBd-H8grozjfjjh-2O2W47G3btelzmXRGpGGcixH44KmI0P4zGL7SYhOe8W2msOsc-pdIqXBQWA8HFbywyR0x9JbLqKkwvVyo_Da1zJTksGVfvJkGFdaO8qncRCm8tL1hxGz4",
+                      patientData?['image'] ?? "https://lh3.googleusercontent.com/aida-public/AB6AXuB5rdlUig5sVgbAcTCgJ6znRDbOYhRVtVfhHSGt9fE6bb3Uf6XtMIF8gOUZzPBRUyKv6wGvi0MyVBNFDmOvt2iQLKatjbFOyjTflXW4In58D7nO1aBSf7sJgJJ2Uq9gnXoGNKTgOoeBd-H8grozjfjjh-2O2W47G3btelzmXRGpGGcixH44KmI0P4zGL7SYhOe8W2msOsc-pdIqXBQWA8HFbywyR0x9JbLqKkwvVyo_Da1zJTksGVfvJkGFdaO8qncRCm8tL1hxGz4",
                       width: 70,
                       height: 70,
                       fit: BoxFit.cover,
@@ -57,12 +70,12 @@ class LabResultsScreen extends StatelessWidget {
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text("Elena Vance",
+                    children: [
+                      Text(patientName,
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
                       SizedBox(height: 4),
-                      Text("ID: PX-8842"),
+                      Text("ID: #$patientId"),
                       Text("DOB: 12/04/1988"),
                     ],
                   )
@@ -78,14 +91,10 @@ class LabResultsScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _tableHeader(),
-                  _tableRow(
-                      "Glucose", "112", "mg/dL", "High", Colors.red),
-                  _tableRow(
-                      "Sodium", "140", "mmol/L", "Normal", Colors.green),
-                  _tableRow(
-                      "Potassium", "3.2", "mmol/L", "Low", Colors.orange),
-                  _tableRow(
-                      "Creatinine", "0.82", "mg/dL", "Normal", Colors.green),
+                  _tableRow(context, "Glucose", "112", "mg/dL", "High", Colors.red),
+                  _tableRow(context, "Sodium", "140", "mmol/L", "Normal", Colors.green),
+                  _tableRow(context, "Potassium", "3.2", "mmol/L", "Low", Colors.orange),
+                  _tableRow(context, "Creatinine", "0.82", "mg/dL", "Normal", Colors.green),
                 ],
               ),
             ),
@@ -168,19 +177,26 @@ class LabResultsScreen extends StatelessWidget {
 
   /// 🔷 Table Row
   Widget _tableRow(
-      String name, String value, String unit, String status, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(name),
-          Text("$value $unit"),
-          Text(
-            status,
-            style: TextStyle(color: color, fontWeight: FontWeight.bold),
-          ),
-        ],
+      BuildContext context, String name, String value, String unit, String status, Color color) {
+    return InkWell(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$name status: $status')),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(name),
+            Text("$value $unit"),
+            Text(
+              status,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
     );
   }

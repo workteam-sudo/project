@@ -7,7 +7,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clinical Sanctuary',
+      title: 'Hospital System',
       theme: ThemeData(
         fontFamily: 'Inter',
         primarySwatch: Colors.blue,
@@ -50,7 +50,7 @@ class AdmissionQueueScreen extends StatelessWidget {
           Icon(Icons.menu, color: Colors.grey[600], size: 24),
           SizedBox(width: 16),
           Text(
-            'Clinical Sanctuary',
+            'Hospital System',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,

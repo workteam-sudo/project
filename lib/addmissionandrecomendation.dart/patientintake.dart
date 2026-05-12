@@ -3,13 +3,13 @@ import 'dart:ui';
 import 'dart:math' as math;
 
 
-class ClinicalSanctuaryApp extends StatelessWidget {
-  const ClinicalSanctuaryApp({super.key});
+class HospitalSystemApp extends StatelessWidget {
+  const HospitalSystemApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clinical Sanctuary',
+      title: 'Hospital System',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Inter',

@@ -42,7 +42,7 @@ class PatientClinicalTimelineScreen extends StatelessWidget {
           Icon(Icons.menu, color: Colors.grey[700]),
           SizedBox(width: 16),
           Text(
-            'Clinical Sanctuary',
+            'Hospital System',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,

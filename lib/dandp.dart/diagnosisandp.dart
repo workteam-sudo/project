@@ -194,7 +194,7 @@ class DiagnosisScreen extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => Navigator.pushNamed(context, '/newscript.dart'),
                     child: const Text(
                       "ADD NEW",
                       style: TextStyle(

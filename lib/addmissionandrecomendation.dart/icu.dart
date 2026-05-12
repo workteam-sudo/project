@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Clinical Sanctuary',
+      title: 'Hospital System',
       theme: ThemeData(
         fontFamily: 'Inter',
         scaffoldBackgroundColor: Color(0xfff8f9fa),
@@ -30,7 +30,7 @@ class ICUDashboard extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          "Clinical Sanctuary",
+          "Hospital System",
           style: TextStyle(
               color: Color(0xff5B85AA),
               fontWeight: FontWeight.bold),
